@@ -25,7 +25,7 @@ class User(db.Model, SerializerMixin):
     def __repr__(self):
         return f'<User {self.username}>'
 
-class Chart(db.Model, SerializerMixin):
+class Cart(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     data = db.Column(mutable_json_type(dbtype=JSONB, nested=True))
@@ -71,50 +71,50 @@ class UserItem(Resource):
         db.session.commit()
         return jsonify(user.to_dict())
 
-class MyCharts(Resource):
+class MyCarts(Resource):
     def get(self, user_id):
-        charts = Chart.query.filter_by(user_id=user_id)
-        return jsonify({'charts':[chart.to_dict() for chart in charts]})
+        carts = Cart.query.filter_by(user_id=user_id)
+        return jsonify({'charts':[cart.to_dict() for cart in carts]})
 
-class Charts(Resource):
+class Carts(Resource):
     def get(self):
-        hives = Chart.query.all()
-        return jsonify({'Charts':[chart.to_dict() for chart in charts]})
+        carts = Cart.query.all()
+        return jsonify({'Charts':[cart.to_dict() for cart in carts]})
 
     def post(self):
         data = request.get_json()
-        new_hive = Chart(user_id=data["user_id"], data=data["data"])
-        db.session.add(new_hive)
+        new_cart = Cart(user_id=data["user_id"], data=data["data"])
+        db.session.add(new_cart)
         db.session.commit()
-        return jsonify(new_hive.to_dict())
+        return jsonify(new_cart.to_dict())
 
-class ChartsItem(Resource):
+class CartsItem(Resource):
     def get(self, id):
-        hive = Beehive.query.filter_by(id=id).first_or_404()
-        return jsonify(hive.to_dict())
+        cart = Cart.query.filter_by(id=id).first_or_404()
+        return jsonify(cart.to_dict())
     
     def put(self, id):
         data = request.get_json()
-        hive = Beehive.query.get_or_404(id)
-        hive.user_id=data['user_id']
-        hive.data=data['data']
+        cart = Cart.query.get_or_404(id)
+        cart.user_id=data['user_id']
+        cart.data=data['data']
         db.session.commit()
-        return jsonify(hive.to_dict())
+        return jsonify(cart.to_dict())
     
     def delete(self, id):
-        hive = Beehive.query.filter_by(id=id).first_or_404()
-        db.session.delete(hive)
+        cart = Cart.query.filter_by(id=id).first_or_404()
+        db.session.delete(cart)
         db.session.commit()
-        return jsonify(hive.to_dict())
+        return jsonify(cart.to_dict())
 
 api.add_resource(HelloWorld,'/hello')
 
 api.add_resource(Users,'/users')
 api.add_resource(UserItem,'/users/<int:user_id>')
 
-api.add_resource(Charts,'/charts')
-api.add_resource(ChartsItem,'/charts/<int:id>')
-api.add_resource(MyCharts,'/mycharts/<int:user_id>')
+api.add_resource(Carts,'/carts')
+api.add_resource(CartsItem,'/carts/<int:id>')
+api.add_resource(MyCarts,'/mycarts/<int:user_id>')
 
 api.init_app(app)
 
@@ -126,15 +126,15 @@ def add_user(db):
     db.session.add(guest)
     db.session.commit()
     
-def add_hives(db):
+def add_carts(db):
     date = str(datetime.utcnow())
-    chart1 = Chart(user_id=1, data={'name':'h1', 'started_date':date, 'data':{'prod': 'item', 'qtd':0.}})
-    chart2 = Chart(user_id=2, data={'name':'h2', 'started_date':date, 'data':{'prod': 'item', 'qtd':0.}})
-    chart3 = Chart(user_id=2, data={'name':'h3', 'started_date':date, 'data':{'prod': 'item', 'qtd':0.}})
+    cart1 = Chart(user_id=1, data={'name':'h1', 'started_date':date, 'data':{'prod': 'item', 'qtd':0.}})
+    cart2 = Chart(user_id=2, data={'name':'h2', 'started_date':date, 'data':{'prod': 'item', 'qtd':0.}})
+    cart3 = Chart(user_id=2, data={'name':'h3', 'started_date':date, 'data':{'prod': 'item', 'qtd':0.}})
     
-    db.session.add(chart1)
-    db.session.add(chart2)
-    db.session.add(chart3)
+    db.session.add(cart1)
+    db.session.add(cart2)
+    db.session.add(cart3)
     db.session.commit()
 
 if __name__ == "__main__":
